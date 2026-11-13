@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Review Buddy</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eff9fb;--card:#fff;--tx:#0b2a33;--mut:#547580;--ac:#00b4d8;--act:#007c99;--on:#03232b;--acbg:#d9f3f8;--bd:#cde7ed;--warn:#a1480a;--ok:#2f7d32;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#08171c;--card:#0f2229;--tx:#e6f8fb;--mut:#86aeb7;--ac:#19d3e6;--act:#19d3e6;--on:#03232b;--acbg:#0f3a45;--bd:#1d3a43;--warn:#f0a060;--ok:#7bd17f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#08171c;--card:#0f2229;--tx:#e6f8fb;--mut:#86aeb7;--ac:#19d3e6;--act:#19d3e6;--on:#03232b;--acbg:#0f3a45;--bd:#1d3a43;--warn:#f0a060;--ok:#7bd17f;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Vazirmatn",Tahoma,sans-serif;font-size:15px;line-height:1.7}
+#app{max-width:560px;margin:0 auto;padding:12px 14px 40px}
+h1{font-size:20px;font-weight:800;margin:6px 0 10px}
+.tabs{display:flex;gap:6px;margin-bottom:14px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:6px 0;z-index:5}
+.tabs button{flex:1;padding:9px 4px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:var(--on)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=text],select,textarea{font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:9px;padding:8px 10px;width:100%}
+select{width:auto;flex:1;min-width:70px}
+button.b{font:inherit;font-weight:600;border:0;background:var(--ac);color:var(--on);padding:9px 14px;border-radius:9px;cursor:pointer}
+button.g{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 12px;border-radius:9px;cursor:pointer}
+.mut{color:var(--mut);font-size:13px}
+.big{font-size:18px;font-weight:800}
+.it{padding:9px 0;border-top:1px solid var(--bd)}
+.it:first-of-type{border-top:0}
+.x{margin-inline-start:auto;border:0;background:none;color:var(--warn);font-size:20px;cursor:pointer;line-height:1}
+.tag{font-size:12px;padding:1px 8px;border-radius:8px;background:var(--acbg);color:var(--act)}
+.chk{display:flex;gap:10px;align-items:flex-start}
+.chk input[type=checkbox]{width:22px;height:22px;margin-top:4px;accent-color:var(--ac);flex:none}
+.chk .t{flex:1}
+.src{margin-top:6px;font-size:14px;padding:6px 9px}
+.done .nm{text-decoration:line-through;color:var(--mut)}
+.empty{text-align:center;color:var(--mut);padding:18px 6px}
+textarea{min-height:90px;direction:ltr;font-size:12px}
+.tw{max-height:68vh;overflow:auto;position:relative}
+table{width:100%;border-collapse:collapse}
+th{position:sticky;top:0;background:var(--acbg);color:var(--act);padding:8px;text-align:start;z-index:1}
+td{vertical-align:top;padding:8px;border-top:1px solid var(--bd);font-size:13px}
+.dc{white-space:nowrap;width:1%}
+tr[data-a]{cursor:pointer}
+tr.sel td{background:var(--acbg)}
+tr.tod .dc b{color:var(--act)}
+.ce{margin-bottom:4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var MN=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
+var WD=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+var fa=function(s){return String(s).replace(/\d/g,function(d){return "۰۱۲۳۴۵۶۷۸۹"[d]})};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+function g2j(gy,gm,gd){var m=[0,31,59,90,120,151,181,212,243,273,304,334];var y2=gm>2?gy+1:gy;
+var days=355666+365*gy+~~((y2+3)/4)-~~((y2+99)/100)+~~((y2+399)/400)+gd+m[gm-1];
+var jy=-1595+33*~~(days/12053);days%=12053;jy+=4*~~(days/1461);days%=1461;
+if(days>365){jy+=~~((days-1)/365);days=(days-1)%365}
+var jm=days<186?1+~~(days/31):7+~~((days-186)/30);var jd=1+(days<186?days%31:(days-186)%30);return [jy,jm,jd]}
+function j2g(jy,jm,jd){jy+=1595;var days=-355668+365*jy+~~(jy/33)*8+~~(((jy%33)+3)/4)+jd+(jm<7?(jm-1)*31:(jm-7)*30+186);
+var gy=400*~~(days/146097);days%=146097;if(days>36524){gy+=100*~~(--days/36524);days%=36524;if(days>=365)days++}
+gy+=4*~~(days/1461);days%=1461;if(days>365){gy+=~~((days-1)/365);days=(days-1)%365}
+var gd=days+1;var a=[0,31,((gy%4==0&&gy%100!=0)||gy%400==0)?29:28,31,30,31,30,31,31,30,31,30,31];
+var gm;for(gm=0;gm<13&&gd>a[gm];gm++)gd-=a[gm];return [gy,gm,gd]}
+function dn(y,m,d){return Math.round(Date.UTC(y,m-1,d)/864e5)}
+function jd(n){var d=new Date(n*864e5);return g2j(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate())}
+function jn(y,m,d){var g=j2g(y,m,d);return dn(g[0],g[1],g[2])}
+var now=new Date(),TODAY=dn(now.getFullYear(),now.getMonth()+1,now.getDate());
+function fmt(n){var j=jd(n);return fa(j[2])+" "+MN[j[1]-1]+" "+fa(j[0])}
+function wd(n){return WD[new Date(n*864e5).getUTCDay()]}
+function ivl(k){return k%30==0?fa(k/30)+" ماه بعد":k%7==0?fa(k/7)+" هفته بعد":fa(k)+" روز بعد"}
+
+var S={int:[1,3,7,30],logs:[],rv:{}};
+try{var r0=localStorage.getItem("rv1");if(r0)S=Object.assign(S,JSON.parse(r0))}catch(e){}
+function save(){try{localStorage.setItem("rv1",JSON.stringify(S))}catch(e){}}
+
+var tab="log",cur=TODAY,dSub="",dTop="",showBk="",tsc=null,ovm=null;
+
+function groups(){var g={};S.logs.forEach(function(l){S.int.forEach(function(k){var d=l.date+k;(g[d]=g[d]||[]).push({l:l,k:k,key:l.id+"_"+k})})});return g}
+
+function render(){
+var h='<h1>Review Buddy</h1><div class="tabs">';
+[["log","ثبت درس"],["ov","نمای کلی"],["set","تنظیمات"]].forEach(function(t){
+h+='<button data-a="tab" data-v="'+t[0]+'" class="'+(tab==t[0]?"on":"")+'">'+t[1]+'</button>'});
+h+='</div>';
+var o=document.getElementById("tw");if(o)tsc=o.scrollTop;
+h+=tab=="log"?vLog():tab=="ov"?vOv():vSet();
+document.getElementById("app").innerHTML=h;
+var tw=document.getElementById("tw");
+if(tw){if(tsc==null){var r=tw.querySelector("tr.tod");if(r)tw.scrollTop=Math.max(0,r.offsetTop-70)}else tw.scrollTop=tsc}}
+
+function vLog(){
+var j=jd(cur),h='<div class="card"><div class="row"><button class="g" data-a="day" data-v="-1">روز قبل</button><div style="flex:1;text-align:center"><div class="big">'+wd(cur)+" "+fmt(cur)+'</div>'+(cur==TODAY?'<span class="tag">امروز</span>':'')+'</div><button class="g" data-a="day" data-v="1">روز بعد</button></div>';
+h+='<div class="row" style="margin-top:10px"><select data-a="pick" id="pd">';
+for(var d=1;d<=31;d++)h+='<option value="'+d+'"'+(d==j[2]?" selected":"")+'>'+fa(d)+'</option>';
+h+='</select><select data-a="pick" id="pm">';
+MN.forEach(function(m,i){h+='<option value="'+(i+1)+'"'+(i+1==j[1]?" selected":"")+'>'+m+'</option>'});
+h+='</select><select data-a="pick" id="py">';
+var y0=jd(TODAY)[0];for(var y=y0-3;y<=y0+1;y++)h+='<option value="'+y+'"'+(y==j[0]?" selected":"")+'>'+fa(y)+'</option>';
+h+='</select><button class="g" data-a="today">امروز</button></div></div>';
+
+h+='<div class="card"><div class="mut" style="margin-bottom:6px">چه خواندی؟</div>'+
+'<input type="text" id="sub" placeholder="نام درس" value="'+esc(dSub)+'"><div style="height:8px"></div>'+
+'<input type="text" id="top" placeholder="مبحث" value="'+esc(dTop)+'"><div style="height:10px"></div>'+
+'<button class="b" data-a="add">ثبت</button></div>';
+
+var L=S.logs.filter(function(l){return l.date==cur});
+h+='<div class="card"><b>Read</b>';
+if(!L.length)h+='<div class="empty">هنوز چیزی برای این روز ثبت نشده.</div>';
+L.forEach(function(l){h+='<div class="it"><div class="row"><b>'+esc(l.subject)+'</b><button class="x" data-a="del" data-v="'+l.id+'" aria-label="حذف">×</button></div>'+
+(l.topic?'<div>'+esc(l.topic)+'</div>':'')+'<div class="mut">مرور: '+S.int.map(function(k){return fmt(l.date+k)}).join("، ")+'</div></div>'});
+h+='</div>';
+
+var due=groups()[cur]||[];
+h+='<div class="card"><b>To Read</b>';
+if(!due.length)h+='<div class="empty">مروری برای این روز نیست.</div>';
+due.forEach(function(i){var r=S.rv[i.key]||{};
+h+='<div class="it '+(r.done?"done":"")+'"><label class="chk"><input type="checkbox" data-a="chk" data-v="'+i.key+'"'+(r.done?" checked":"")+'><span class="t"><span class="nm"><b>'+esc(i.l.subject)+'</b>'+(i.l.topic?" — "+esc(i.l.topic):"")+'</span><div class="mut">خوانده‌شده '+fmt(i.l.date)+" · "+ivl(i.k)+'</div></span></label>'+
+'<input type="text" class="src" data-a="src" data-v="'+i.key+'" placeholder="منبع مرور" value="'+esc(r.src||"")+'"></div>'});
+h+='</div>';
+return h}
+
+function vOv(){
+var g=groups(),rd={};
+S.logs.forEach(function(l){(rd[l.date]=rd[l.date]||[]).push(l)});
+var ym=ovm||jd(TODAY).slice(0,2),y=ym[0],m=ym[1];
+var len=m<=6?31:m<=11?30:(jn(y+1,1,1)-jn(y,12,1));
+var h='<div class="card"><div class="row"><button class="g" data-a="mon" data-v="-1">ماه قبل</button><div class="big" style="flex:1;text-align:center">'+MN[m-1]+" "+fa(y)+'</div><button class="g" data-a="mon" data-v="1">ماه بعد</button></div></div>';
+h+='<div class="card" style="padding:0;overflow:hidden"><div id="tw" class="tw"><table><thead><tr><th>تاریخ</th><th>Read</th><th>To Read</th></tr></thead><tbody>';
+for(var i=1;i<=len;i++){var d=jn(y,m,i);
+h+='<tr data-a="row" data-v="'+d+'" class="'+(d==cur?"sel ":"")+(d==TODAY?"tod":"")+'"><td class="dc"><b>'+fa(i)+" "+MN[m-1]+'</b><div class="mut">'+wd(d)+'</div></td><td>';
+(rd[d]||[]).forEach(function(l){h+='<div class="ce">'+esc(l.subject)+(l.topic?" — "+esc(l.topic):"")+'</div>'});
+h+='</td><td>';
+(g[d]||[]).forEach(function(it){var ok=S.rv[it.key]&&S.rv[it.key].done;h+='<div class="ce'+(ok?" done":"")+'">'+(ok?"✓ ":"")+'<span class="nm">'+esc(it.l.subject)+(it.l.topic?" — "+esc(it.l.topic):"")+'</span></div>'});
+h+='</td></tr>'}
+return h+'</tbody></table></div></div>'}
+
+function vTableOld(){
+var g=groups(),rd={},days={};
+S.logs.forEach(function(l){(rd[l.date]=rd[l.date]||[]).push(l);days[l.date]=1});
+for(var d in g)days[d]=1;days[TODAY]=1;
+var ks=Object.keys(days).map(Number).sort(function(a,b){return a-b});
+var h='<div class="card" style="padding:0;overflow:hidden"><div id="tw" class="tw"><table><thead><tr><th>تاریخ</th><th>Read</th><th>To Read</th></tr></thead><tbody>';
+ks.forEach(function(d){
+h+='<tr data-a="row" data-v="'+d+'" class="'+(d==cur?"sel ":"")+(d==TODAY?"tod":"")+'"><td class="dc"><b>'+fmt(d)+'</b><div class="mut">'+wd(d)+'</div></td><td>';
+(rd[d]||[]).forEach(function(l){h+='<div class="ce">'+esc(l.subject)+(l.topic?" — "+esc(l.topic):"")+'</div>'});
+h+='</td><td>';
+(g[d]||[]).forEach(function(i){var ok=S.rv[i.key]&&S.rv[i.key].done;h+='<div class="ce'+(ok?" done":"")+'">'+(ok?"✓ ":"")+'<span class="nm">'+esc(i.l.subject)+(i.l.topic?" — "+esc(i.l.topic):"")+'</span></div>'});
+h+='</td></tr>'});
+return h+'</tbody></table></div></div>'}
+
+function vSet(){
+return '<div class="card"><b>فاصله‌های مرور (روز)</b><div class="mut" style="margin:4px 0 8px">با کاما جدا کن. پیش‌فرض: ۱، ۳، ۷، ۳۰</div>'+
+'<input type="text" id="ints" dir="ltr" value="'+S.int.join(",")+'"><div style="height:10px"></div><button class="b" data-a="ints">ذخیره</button></div>'+
+'<div class="card"><b>پشتیبان‌گیری</b><div class="mut" style="margin:4px 0 8px">داده‌ها فقط روی همین مرورگر ذخیره می‌شوند. برای انتقال یا نگه‌داری، متن زیر را کپی کن.</div>'+
+'<textarea id="bk">'+esc(showBk)+'</textarea><div class="row" style="margin-top:8px"><button class="g" data-a="exp">نمایش پشتیبان</button><button class="g" data-a="imp">بازیابی از متن</button></div></div>'}
+
+var A=document.getElementById("app");
+A.addEventListener("input",function(e){if(e.target.id=="sub")dSub=e.target.value;if(e.target.id=="top")dTop=e.target.value});
+A.addEventListener("change",function(e){var t=e.target,a=t.dataset.a;
+if(a=="pick"){var y=+document.getElementById("py").value,m=+document.getElementById("pm").value,d=+document.getElementById("pd").value,n=jn(y,m,d);while(jd(n)[1]!=m)n--;cur=n;render()}
+else if(a=="chk"){S.rv[t.dataset.v]=Object.assign(S.rv[t.dataset.v]||{},{done:t.checked});save();render()}
+else if(a=="src"){S.rv[t.dataset.v]=Object.assign(S.rv[t.dataset.v]||{},{src:t.value});save()}});
+A.addEventListener("click",function(e){var t=e.target.closest("[data-a]");if(!t)return;var a=t.dataset.a,v=t.dataset.v;
+if(a=="tab"){tab=v;tsc=null;render()}
+else if(a=="row"){cur=+v;tab="log";tsc=null;render();window.scrollTo(0,0)}
+else if(a=="mon"){var o2=ovm||jd(TODAY).slice(0,2),mm=o2[1]+ +v,yy=o2[0];if(mm>12){mm=1;yy++}if(mm<1){mm=12;yy--}ovm=[yy,mm];tsc=null;render()}
+else if(a=="day"){cur+=+v;render()}
+else if(a=="today"){cur=TODAY;render()}
+else if(a=="add"){var s=dSub.trim();if(!s){document.getElementById("sub").focus();return}
+S.logs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),date:cur,subject:s,topic:dTop.trim()});dSub="";dTop="";save();render()}
+else if(a=="del"){if(confirm("این مورد حذف شود؟")){S.logs=S.logs.filter(function(l){return l.id!=v});save();render()}}
+else if(a=="ints"){var arr=document.getElementById("ints").value.split(/[,،\s]+/).map(Number).filter(function(x){return x>0&&isFinite(x)});
+arr=arr.filter(function(x,i){return arr.indexOf(x)==i}).sort(function(a,b){return a-b});if(arr.length){S.int=arr;save();render()}}
+else if(a=="exp"){showBk=JSON.stringify(S);render()}
+else if(a=="imp"){try{var o=JSON.parse(document.getElementById("bk").value);if(o&&o.logs&&o.int){S=o;save();showBk="";render()}else alert("متن پشتیبان معتبر نیست.")}catch(x){alert("متن پشتیبان معتبر نیست.")}}});
+render();
+</script>
+</body>
+</html>
