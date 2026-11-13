@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Review Buddy</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Review Buddy">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#00b4d8">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#eff9fb;--card:#fff;--tx:#0b2a33;--mut:#547580;--ac:#00b4d8;--act:#007c99;--on:#03232b;--acbg:#d9f3f8;--bd:#cde7ed;--warn:#a1480a;--ok:#2f7d32;
@@ -202,6 +207,46 @@ h+='</td><td>';
 h+='</td></tr>'});
 return h+'</tbody></table></div></div>'}
 
+var showTbl=false;
+function mdata(){var g=groups(),rd={};S.logs.forEach(function(l){(rd[l.date]=rd[l.date]||[]).push(l)});
+var ym=ovm||jd(TODAY).slice(0,2),y=ym[0],m=ym[1],len=m<=6?31:m<=11?30:(jn(y+1,1,1)-jn(y,12,1)),rows=[];
+for(var i=1;i<=len;i++){var d=jn(y,m,i);
+rows.push({d:fa(i)+" "+MN[m-1]+" ("+wd(d)+")",
+r:(rd[d]||[]).map(function(l){return l.subject+(l.topic?" — "+l.topic:"")}),
+t:(g[d]||[]).map(function(it){var ok=S.rv[it.key]&&S.rv[it.key].done;return (ok?"✓ ":"")+it.l.subject+(it.l.topic?" — "+it.l.topic:"")})})}
+return {title:MN[m-1]+" "+fa(y),rows:rows}}
+function htmlTbl(){var D=mdata(),st='style="border:1px solid #999;padding:4px 8px;text-align:right;color:#000;vertical-align:top"';
+var h='<table dir="rtl" style="border-collapse:collapse"><tr><th '+st+' colspan="3">'+D.title+'</th></tr><tr>';
+["تاریخ","Read","To Read"].forEach(function(x){h+='<th '+st+'>'+x+'</th>'});h+='</tr>';
+D.rows.forEach(function(r){h+='<tr><td '+st+'>'+esc(r.d)+'</td><td '+st+'>'+r.r.map(esc).join("<br>")+'</td><td '+st+'>'+r.t.map(esc).join("<br>")+'</td></tr>'});
+return h+'</table>'}
+function tsv(){var D=mdata(),o=[D.title,"تاریخ\tRead\tTo Read"];
+D.rows.forEach(function(r){o.push([r.d,r.r.join(" | "),r.t.join(" | ")].join("\t"))});return o.join("\n")}
+async function copyMonth(){var html=htmlTbl(),txt=tsv();
+try{await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([txt],{type:"text/plain"})})]);toast();return}catch(e){}
+try{await navigator.clipboard.writeText(txt);toast()}catch(x){}}
+function htmlTblOld(){var iv=S.int,st='style="border:1px solid #999;padding:4px 8px;text-align:right;color:#000"';
+var h='<table dir="rtl" style="border-collapse:collapse"><tr>';
+["تاریخ","درس","مبحث"].forEach(function(x){h+='<th '+st+'>'+x+'</th>'});
+iv.forEach(function(k){["مرور "+ivl(k),"وضعیت","منبع"].forEach(function(x){h+='<th '+st+'>'+x+'</th>'})});
+h+='</tr>';
+S.logs.slice().sort(function(a,b){return a.date-b.date}).forEach(function(l){
+h+='<tr><td '+st+'>'+fmt(l.date)+'</td><td '+st+'>'+esc(l.subject)+'</td><td '+st+'>'+esc(l.topic||"")+'</td>';
+iv.forEach(function(k){var v=S.rv[l.id+"_"+k]||{};h+='<td '+st+'>'+fmt(l.date+k)+'</td><td '+st+'>'+(v.done?"✓":"")+'</td><td '+st+'>'+esc(v.src||"")+'</td>'});
+h+='</tr>'});
+return h+'</table>'}
+function toast(){var t=document.createElement("div");t.textContent="کپی شد ✓";t.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ac);color:var(--on);padding:8px 16px;border-radius:20px;z-index:20";document.body.appendChild(t);setTimeout(function(){t.remove()},1400)}
+async function copyIt(){
+if(showTbl){var html=htmlTbl(),txt=tsv();
+try{await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([txt],{type:"text/plain"})})]);toast();return}catch(e){}
+var d=document.getElementById("tbv");if(d){var rg=document.createRange();rg.selectNodeContents(d);var sl=getSelection();sl.removeAllRanges();sl.addRange(rg);document.execCommand("copy");toast()}
+}else{var ta=document.getElementById("bk");if(!ta)return;ta.select();try{await navigator.clipboard.writeText(ta.value)}catch(x){document.execCommand("copy")}toast()}}
+function tsvOld(){var iv=S.int,hd=["تاریخ","درس","مبحث"];iv.forEach(function(k){hd.push("مرور "+ivl(k),"وضعیت","منبع")});
+var rows=[hd.join("\t")];
+S.logs.slice().sort(function(a,b){return a.date-b.date}).forEach(function(l){var r=[fmt(l.date),l.subject,l.topic||""];
+iv.forEach(function(k){var v=S.rv[l.id+"_"+k]||{};r.push(fmt(l.date+k),v.done?"✓":"",v.src||"")});
+rows.push(r.map(function(x){return String(x).replace(/[\t\r\n]+/g," ")}).join("\t"))});
+return rows.join("\n")}
 function vSync(){
 var h='<div class="card"><b>همگام‌سازی ابری</b>';
 if(C.ses){
@@ -221,7 +266,7 @@ function vSet(){
 return vSync()+'<div class="card"><b>فاصله‌های مرور (روز)</b><div class="mut" style="margin:4px 0 8px">با کاما جدا کن. پیش‌فرض: ۱، ۳، ۷، ۳۰</div>'+
 '<input type="text" id="ints" dir="ltr" value="'+S.int.join(",")+'"><div style="height:10px"></div><button class="b" data-a="ints">ذخیره</button></div>'+
 '<div class="card"><b>پشتیبان‌گیری</b><div class="mut" style="margin:4px 0 8px">داده‌ها فقط روی همین مرورگر ذخیره می‌شوند. برای انتقال یا نگه‌داری، متن زیر را کپی کن.</div>'+
-'<textarea id="bk">'+esc(showBk)+'</textarea><div class="row" style="margin-top:8px"><button class="g" data-a="exp">نمایش پشتیبان</button><button class="g" data-a="imp">بازیابی از متن</button></div></div>'}
+(showTbl?'<div style="max-height:50vh;overflow:auto;border:1px solid var(--bd);border-radius:9px;padding:4px;background:#fff"><div id="tbv" style="width:max-content;font-size:12px">'+htmlTbl()+'</div></div>':'<textarea id="bk">'+esc(showBk)+'</textarea>')+'<div class="row" style="margin-top:8px"><button class="g" data-a="exp">نمایش پشتیبان</button><button class="g" data-a="tbl">جدول برای کپی</button><button class="g" data-a="cp">کپی</button><button class="g" data-a="imp">بازیابی از متن</button></div></div>'}
 
 var A=document.getElementById("app");
 A.addEventListener("input",function(e){if(e.target.id=="sub")dSub=e.target.value;if(e.target.id=="top")dTop=e.target.value});
@@ -244,8 +289,11 @@ S.logs.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),da
 else if(a=="del"){if(confirm("این مورد حذف شود؟")){S.logs=S.logs.filter(function(l){return l.id!=v});S.del[v]=Date.now();save();render()}}
 else if(a=="ints"){var arr=document.getElementById("ints").value.split(/[,،\s]+/).map(Number).filter(function(x){return x>0&&isFinite(x)});
 arr=arr.filter(function(x,i){return arr.indexOf(x)==i}).sort(function(a,b){return a-b});if(arr.length){S.int=arr;S.it=Date.now();save();render()}}
-else if(a=="exp"){showBk=JSON.stringify(S);render()}
-else if(a=="imp"){try{var o=JSON.parse(document.getElementById("bk").value);if(o&&o.logs&&o.int){S=o;S.del=S.del||{};S.it=Date.now();save();showBk="";render()}else alert("متن پشتیبان معتبر نیست.")}catch(x){alert("متن پشتیبان معتبر نیست.")}}});
+else if(a=="exp"){showTbl=false;showBk=JSON.stringify(S);render()}
+else if(a=="tbl"){showTbl=true;render()}
+else if(a=="cp"){copyIt()}
+else if(a=="cpm"){copyMonth()}
+else if(a=="imp"){if(showTbl){showTbl=false;showBk="";render();return}try{var o=JSON.parse(document.getElementById("bk").value);if(o&&o.logs&&o.int){S=o;S.del=S.del||{};S.it=Date.now();save();showBk="";render()}else alert("متن پشتیبان معتبر نیست.")}catch(x){alert("متن پشتیبان معتبر نیست.")}}});
 render();
 if(C.ses)syncNow();
 </script>
